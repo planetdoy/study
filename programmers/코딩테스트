@@ -30,3 +30,20 @@ List<String> → String[]	    list.toArray(new String[0])	            최적 크
 대소문자 무시하고 정렬	        list.sort(String.CASE_INSENSITIVE_ORDER)
 길이순 정렬	                    list.sort(Comparator.comparingInt(String::length))
 ```
+
+## SQL - SELECT
+```sql
+-- date 타입에서 월을 구하려면 month() 를 사용하면 됩니다.
+-- EX 
+select month(date_of_birth) 
+from member;
+
+-- or 
+select date_format('%m', date_of_birth) 
+from member;
+
+-- '%Y' -> 1994
+-- '%y' -> 94 
+-- '%M' -> december
+-- '%m' -> 12
+```
