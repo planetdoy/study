@@ -60,3 +60,8 @@ int[] upper = new int[26];
 int[] lower = new int[26];
 IntStream.concat(Arrays.stream(upper), Arrays.stream(lower)).toArray();
 ```
+
+## char[] 에 빈값을 넣을 수 없다?
+> Java에서 **'' (빈 문자 리터럴)**은 존재하지 않습니다.  
+> char 타입은 반드시 한 개의 문자를 포함해야 합니다.  
+> 빈 값을 넣고 싶다면 **공백 문자 ' ' (스페이스)나 \0 (널 문자)**를 사용해야 합니다.  
