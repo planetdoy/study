@@ -65,3 +65,221 @@ IntStream.concat(Arrays.stream(upper), Arrays.stream(lower)).toArray();
 > Java에서 **'' (빈 문자 리터럴)**은 존재하지 않습니다.  
 > char 타입은 반드시 한 개의 문자를 포함해야 합니다.  
 > 빈 값을 넣고 싶다면 **공백 문자 ' ' (스페이스)나 \0 (널 문자)**를 사용해야 합니다.  
+
+# 배열 복사
+✅ 어떤 방법을 써야 할까?
+
+
+|방법|사용 추천 상황|
+|--------------------|---------------|
+|Arrays.copyOfRange()|가장 간단한 방법|
+|System.arraycopy()|성능이 중요한 경우|
+|for 문|배열 조작이 필요한 경우|
+|List.subList()|List로 변환해서 사용하려는 경우|
+
+> 가장 간단하게는 Arrays.copyOfRange()를 사용하면 되고, 성능이 중요하다면 System.arraycopy()를 고려하면 됩니다. 🚀  
+
+# 배열 이어붙이기
+Java에서 두 개의 배열을 하나로 이어붙이는 방법은 여러 가지가 있습니다.  
+
+---
+
+## 1. `System.arraycopy()` 사용 (가장 빠른 방법)
+`System.arraycopy()`는 `native` 코드로 최적화되어 있어 성능이 뛰어납니다.
+
+```java
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array1 = {1, 2, 3};
+        int[] array2 = {4, 5, 6};
+
+        int[] mergedArray = new int[array1.length + array2.length];
+
+        System.arraycopy(array1, 0, mergedArray, 0, array1.length);
+        System.arraycopy(array2, 0, mergedArray, array1.length, array2.length);
+
+        System.out.println(Arrays.toString(mergedArray)); // [1, 2, 3, 4, 5, 6]
+    }
+}
+```
+> `System.arraycopy(src, srcPos, dest, destPos, length);`
+> - `src`: 원본 배열  
+> - `srcPos`: 원본 배열에서 복사를 시작할 위치  
+> - `dest`: 대상 배열  
+> - `destPos`: 대상 배열에서 붙여넣을 위치  
+> - `length`: 복사할 길이  
+
+---
+
+## 2. `Arrays.copyOf()` + `System.arraycopy()` (단순한 방법)
+`Arrays.copyOf()`를 사용하면 첫 번째 배열을 복사한 후, `System.arraycopy()`로 두 번째 배열을 이어붙일 수 있습니다.
+
+```java
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array1 = {1, 2, 3};
+        int[] array2 = {4, 5, 6};
+
+        int[] mergedArray = Arrays.copyOf(array1, array1.length + array2.length);
+        System.arraycopy(array2, 0, mergedArray, array1.length, array2.length);
+
+        System.out.println(Arrays.toString(mergedArray)); // [1, 2, 3, 4, 5, 6]
+    }
+}
+```
+> `Arrays.copyOf()`는 기존 배열을 복사하면서 크기를 늘려준다.
+
+---
+
+## 3. `Stream.concat()` 사용 (`List` 변환)
+Java 8 이상에서는 `Stream.concat()`을 활용하면 직관적으로 배열을 합칠 수 있습니다.
+
+```java
+import java.util.Arrays;
+import java.util.stream.IntStream;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array1 = {1, 2, 3};
+        int[] array2 = {4, 5, 6};
+
+        int[] mergedArray = IntStream.concat(Arrays.stream(array1), Arrays.stream(array2)).toArray();
+
+        System.out.println(Arrays.toString(mergedArray)); // [1, 2, 3, 4, 5, 6]
+    }
+}
+```
+> `IntStream.concat()`은 두 개의 `IntStream`을 합친 후, `toArray()`로 배열로 변환한다.
+
+---
+
+## 4. `List` 변환 후 `toArray()`
+배열을 `List`로 변환하여 합친 후 다시 배열로 변환하는 방법도 있다.
+
+```java
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Stream;
+
+public class Main {
+    public static void main(String[] args) {
+        Integer[] array1 = {1, 2, 3};
+        Integer[] array2 = {4, 5, 6};
+
+        Integer[] mergedArray = Stream.concat(Arrays.stream(array1), Arrays.stream(array2))
+                                      .toArray(Integer[]::new);
+
+        System.out.println(Arrays.toString(mergedArray)); // [1, 2, 3, 4, 5, 6]
+    }
+}
+```
+> ⚠ `int[]`가 아닌 `Integer[]` 배열에서만 가능하다.
+
+---
+
+## ✅ 어떤 방법을 써야 할까?
+| 방법 | 추천 상황 |
+|------|------------|
+| `System.arraycopy()` | 성능이 중요할 때 (가장 빠름) |
+| `Arrays.copyOf()` + `System.arraycopy()` | 코드가 간결한 방법이 필요할 때 |
+| `Stream.concat()` | Java 8 이상에서 가독성을 원할 때 |
+| `List 변환 후 toArray()` | `Integer[]`처럼 객체 배열을 사용할 때 |
+
+**가장 빠른 방법**은 `System.arraycopy()`,  
+**가장 간결한 방법**은 `Stream.concat()`입니다. 🚀
+
+# int[] 를 List<Integer> 로 변환 
+`int[]` 배열을 `List<Integer>`로 변환하는 방법은 여러 가지가 있습니다.  
+
+---
+
+## 1. `Arrays.stream()` + `boxed()` 사용 (Java 8+)
+Java 8 이상에서는 `Arrays.stream()`을 활용하여 `int` 값을 `Integer`로 변환할 수 있습니다.
+
+```java
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array = {1, 2, 3, 4, 5};
+
+        List<Integer> list = Arrays.stream(array) // IntStream 생성
+                                   .boxed()      // int -> Integer 변환
+                                   .collect(Collectors.toList());
+
+        System.out.println(list); // [1, 2, 3, 4, 5]
+    }
+}
+```
+> ✅ `boxed()`를 사용하면 기본 타입 `int`를 `Integer`로 변환합니다.  
+> ✅ **Java 8 이상에서 가장 직관적이고 깔끔한 방법입니다.**  
+
+---
+
+## 2. `for` 문을 사용한 변환 (Java 7 이하)
+Java 7 이하에서는 `for` 문을 사용하여 수동으로 변환해야 합니다.
+
+```java
+import java.util.ArrayList;
+import java.util.List;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array = {1, 2, 3, 4, 5};
+
+        List<Integer> list = new ArrayList<>();
+        for (int num : array) {
+            list.add(num); // int -> Integer (Auto-Boxing)
+        }
+
+        System.out.println(list); // [1, 2, 3, 4, 5]
+    }
+}
+```
+> ✅ **모든 Java 버전에서 사용 가능**하지만, 코드가 길어질 수 있습니다.  
+> ✅ **성능이 중요할 경우 `ArrayList`의 초기 용량을 지정**하는 것이 좋습니다.  
+> ```java
+> List<Integer> list = new ArrayList<>(array.length);
+> ```
+
+---
+
+## 3. `IntStream.of()` 사용 (Java 8+)
+`IntStream.of()`도 `Arrays.stream()`과 같은 방식으로 사용할 수 있습니다.
+
+```java
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] array = {1, 2, 3, 4, 5};
+
+        List<Integer> list = IntStream.of(array)
+                                      .boxed()
+                                      .collect(Collectors.toList());
+
+        System.out.println(list); // [1, 2, 3, 4, 5]
+    }
+}
+```
+> ✅ `IntStream.of(array)`를 사용하면 `IntStream`을 직접 생성할 수 있습니다.  
+> ✅ `Arrays.stream(array)`와 거의 동일한 방식으로 동작합니다.
+
+---
+
+## ✅ 어떤 방법을 써야 할까?
+| 방법 | 추천 상황 |
+|------|------------|
+| `Arrays.stream().boxed().collect(Collectors.toList())` | **Java 8 이상**에서 가장 간결하고 효율적인 방법 |
+| `for` 문 + `ArrayList` | **Java 7 이하**에서도 동작하며, 명확한 코드가 필요할 때 |
+| `IntStream.of().boxed().collect(Collectors.toList())` | `IntStream.of()`를 선호하는 경우 사용 가능 |
+
+> **Java 8 이상이면 `Arrays.stream()` + `boxed()`를 사용하세요!** 🚀
